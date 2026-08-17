@@ -317,6 +317,12 @@ export async function addTask(
       estimatedMinutes: input.estimatedMinutes,
       priority: input.priority,
       source: "user",
+      // If the category is a win type (physical / mental / emotional),
+      // set winType too — so it appears in "Today's three wins" on the
+      // Today page. Without this, user-added tasks never surface as wins.
+      winType: ["physical", "mental", "emotional"].includes(input.category)
+        ? input.category
+        : null,
       startAt,
       endAt,
     })
@@ -391,7 +397,13 @@ export async function editTask(
 
   const patch: Record<string, unknown> = {};
   if (input.title !== undefined) patch.title = input.title;
-  if (input.category !== undefined) patch.category = input.category;
+  if (input.category !== undefined) {
+    patch.category = input.category;
+    // Keep winType in sync with category for win-type categories
+    patch.winType = ["physical", "mental", "emotional"].includes(input.category)
+      ? input.category
+      : null;
+  }
   if (input.startAt !== undefined) patch.startAt = input.startAt;
   if (input.endAt !== undefined) patch.endAt = input.endAt;
   if (input.tags !== undefined) patch.tags = input.tags;
