@@ -127,11 +127,10 @@ export async function ensureVocabulary(
     known,
   );
 
+  // If AI returned only fallback words that are all already known,
+  // still show them for today — they're better than nothing.
   const fresh = data.words.filter((w) => !known.includes(w.word.toLowerCase()));
-
-  // If AI returned fallback words that are all already known, still show something
-  // rather than silently returning empty — use the fallback words regardless.
-  const toInsert = fresh.length > 0 ? fresh : data.words.slice(0, count);
+  const toInsert = fresh.length >= 3 ? fresh : data.words.slice(0, count);
   if (toInsert.length === 0) return { words: [], aiUsed: source !== "fallback" };
 
   const inserted = await db
@@ -147,7 +146,12 @@ export async function ensureVocabulary(
         learnedOn: day,
       })),
     )
-    .onConflictDoNothing({ target: [vocabulary.userId, vocabulary.word] })
+    // If word already exists for this user, update learnedOn to today so it
+    // surfaces on the Learn page — the user is reviewing it again.
+    .onConflictDoUpdate({
+      target: [vocabulary.userId, vocabulary.word],
+      set: { learnedOn: day },
+    })
     .returning();
 
   for (const row of inserted) {
