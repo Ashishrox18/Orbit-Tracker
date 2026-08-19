@@ -286,11 +286,19 @@ export function Timeline({
   };
 
   const remove = async (id: string) => {
-    setPending((prev) => ({ ...prev, [id]: null })); // null hides it optimistically
-    await del("/api/tasks", { id });
-    settle(id);
-    router.refresh();
-  };
+    // Mark as null immediately (hides the row) and don't clear until after
+    // refresh — prevents the item from flickering back into view.
+    setPending((prev) => ({ ...prev, [id]: null }))
+    await del("/api/tasks", { id })
+    router.refresh()
+    // Only remove the key from pending after the server has confirmed —
+    // router.refresh() is async but we don't need to await it for this.
+    setPending((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
 
   if (rows.length === 0) {
     return <p className="text-sm text-ink-faint">No tasks scheduled.</p>;
