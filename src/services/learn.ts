@@ -128,12 +128,16 @@ export async function ensureVocabulary(
   );
 
   const fresh = data.words.filter((w) => !known.includes(w.word.toLowerCase()));
-  if (fresh.length === 0) return { words: [], aiUsed: source !== "fallback" };
+
+  // If AI returned fallback words that are all already known, still show something
+  // rather than silently returning empty — use the fallback words regardless.
+  const toInsert = fresh.length > 0 ? fresh : data.words.slice(0, count);
+  if (toInsert.length === 0) return { words: [], aiUsed: source !== "fallback" };
 
   const inserted = await db
     .insert(vocabulary)
     .values(
-      fresh.map((w) => ({
+      toInsert.map((w) => ({
         userId: user.id,
         word: w.word.toLowerCase(),
         partOfSpeech: w.partOfSpeech,
@@ -189,6 +193,7 @@ export async function ensureRichConcept(
   user: User,
   day: string,
   requested: string | null,
+  force = false,
 ): Promise<{ session: typeof learningSessions.$inferSelect; aiUsed: boolean }> {
   const existing = await db
     .select()
@@ -196,7 +201,8 @@ export async function ensureRichConcept(
     .where(and(eq(learningSessions.userId, user.id), eq(learningSessions.date, day)))
     .limit(1);
 
-  if (existing[0] && !requested) {
+  // Return cached only when no explicit topic was requested AND not forced
+  if (existing[0] && !requested && !force) {
     return { session: existing[0], aiUsed: existing[0].generatedByAi };
   }
 
