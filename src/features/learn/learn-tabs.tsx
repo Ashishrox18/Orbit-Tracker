@@ -225,8 +225,8 @@ function VocabLayer({ date, words }: { date: string; words: Word[] }) {
             </Button>
           </div>
           {error ? (
-            <p role="alert" className="mt-3 text-sm text-danger">
-              {error}
+            <p role="alert" className="mt-3 text-sm text-danger text-center">
+              {error} — check your Groq API key in settings.
             </p>
           ) : null}
         </Card>
@@ -339,6 +339,7 @@ function ConceptLayer({ date, concept }: { date: string; concept: Props["concept
     startTransition(async () => {
       const res = await post("/api/learn/concept", {
         date,
+        force: true,  // always regenerate when user explicitly clicks
         ...(own && topic.trim() ? { topic: topic.trim() } : {}),
       });
       if (!res.ok) setError(res.error);
