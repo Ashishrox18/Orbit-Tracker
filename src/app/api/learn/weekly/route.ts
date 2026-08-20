@@ -1,26 +1,27 @@
 import { z } from "zod";
-
 import { getLocalUser } from "@/db";
 import { handle, UserFacingError } from "@/lib/api";
 import { isoDate } from "@/lib/contracts";
-import { completeWeeklyReview, ensureWeeklyReview } from "@/services/learn";
+import { weeklyMaterial } from "@/services/learn";
 
-const generate = z.object({ weekEnding: isoDate });
-const complete = z.object({ weekEnding: isoDate, score: z.number().int().min(0).max(100) });
+// GET-equivalent via POST — return this week's material as a plain list, no AI
+const input = z.object({ weekEnding: isoDate });
 
 export async function POST(request: Request) {
-  return handle(request, generate, { limit: 8 }, async (input) => {
+  return handle(request, input, { limit: 60 }, async (body) => {
     const user = await getLocalUser();
     if (!user.onboardedAt) throw new UserFacingError("Finish onboarding first.", 409);
-    return ensureWeeklyReview(user, input.weekEnding);
-  });
-}
-
-export async function PATCH(request: Request) {
-  return handle(request, complete, { limit: 20 }, async (input) => {
-    const user = await getLocalUser();
-    const review = await completeWeeklyReview(user, input.weekEnding, input.score);
-    if (!review) throw new UserFacingError("No review exists for that week.", 404);
-    return { review };
+    const material = await weeklyMaterial(user.id, body.weekEnding);
+    return {
+      review: {
+        synthesis: null,
+        questions: [
+          ...material.words.map((w) => ({ prompt: `What does "${w}" mean?`, answer: "", source: "vocabulary" })),
+          ...material.concepts.map((c) => ({ prompt: `Explain: ${c}`, answer: "", source: "concept" })),
+        ],
+        wordCount:    material.words.length,
+        conceptCount: material.concepts.length,
+      },
+    };
   });
 }
