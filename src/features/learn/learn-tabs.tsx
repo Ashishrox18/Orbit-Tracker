@@ -449,7 +449,7 @@ function WeeklySession({ weekEnding, isSunday }: { weekEnding: string; isSunday:
               review.questions.map((q, i) => (
                 <li key={i} className="rounded-lg border border-line p-3">
                   <p className="text-sm font-medium">{q.prompt}</p>
-                  <Badge className="mt-1">{q.source}</Badge>
+                  <Badge>{q.source}</Badge>
                   {shown[i] ? (
                     <p className="mt-2 text-sm text-ink-soft">{q.answer || "(no answer saved yet)"}</p>
                   ) : (
