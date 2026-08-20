@@ -75,7 +75,7 @@ export default async function LearnPage() {
           trains:       l.trains,
           sessions:     history[l.id]?.sessions    ?? 0,
           best:         history[l.id]?.best        ?? 0,
-          last:         history[l.id]?.last        ?? 0,
+          last:         history[l.id]?.last        ?? null,
           lastPlayedOn: history[l.id]?.lastPlayedOn ?? null,
         }))}
       />
