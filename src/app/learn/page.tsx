@@ -18,7 +18,7 @@ export default async function LearnPage() {
   const user = await getLocalUser();
   if (!user.onboardedAt) redirect("/onboarding");
 
-  const date = todayISO();
+  const date      = todayISO();
   const weekEnding = currentWeekEnding(date);
 
   const [words, concept, due, summary, links, history] = await Promise.all([
@@ -35,8 +35,7 @@ export default async function LearnPage() {
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">Learn</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Four layers, one review queue. Recall before you re-read — that is what moves anything
-          into long-term memory.
+          Add words and concepts manually. Review them with spaced repetition.
         </p>
       </header>
 
@@ -45,24 +44,24 @@ export default async function LearnPage() {
         weekEnding={weekEnding}
         isSunday={weekdayIndex(date) === 0}
         words={words.map((w) => ({
-          id: w.id,
-          word: w.word,
-          partOfSpeech: w.partOfSpeech,
-          meaning: w.meaning,
-          etymology: w.etymology,
-          examples: w.examples,
-          userSentence: w.userSentence,
+          id:              w.id,
+          word:            w.word,
+          partOfSpeech:    w.partOfSpeech,
+          meaning:         w.meaning,
+          etymology:       w.etymology,
+          examples:        w.examples,
+          userSentence:    w.userSentence,
           sentenceVerdict: w.sentenceVerdict,
           sentenceFeedback: w.sentenceFeedback,
         }))}
         concept={
           concept
             ? {
-                topic: concept.topic,
-                explanation: concept.explanation,
-                connections: concept.connections,
+                topic:           concept.topic,
+                explanation:     concept.explanation,
+                connections:     concept.connections,
                 applicationPrompt: concept.applicationPrompt,
-                generatedByAi: concept.generatedByAi,
+                generatedByAi:   concept.generatedByAi,
               }
             : null
         }
@@ -70,13 +69,13 @@ export default async function LearnPage() {
         queue={summary.stats}
         retention={summary.retention}
         trainingLinks={links.map((l) => ({
-          id: l.id,
-          name: l.name,
-          url: l.url,
-          trains: l.trains,
-          sessions: history[l.id]?.sessions ?? 0,
-          best: history[l.id]?.best ?? 0,
-          last: history[l.id]?.last ?? null,
+          id:           l.id,
+          name:         l.name,
+          url:          l.url,
+          trains:       l.trains,
+          sessions:     history[l.id]?.sessions    ?? 0,
+          best:         history[l.id]?.best        ?? 0,
+          last:         history[l.id]?.last        ?? 0,
           lastPlayedOn: history[l.id]?.lastPlayedOn ?? null,
         }))}
       />
