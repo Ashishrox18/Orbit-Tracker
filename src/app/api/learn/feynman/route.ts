@@ -1,11 +1,9 @@
-import { getLocalUser } from "@/db";
-import { handle } from "@/lib/api";
-import { feynmanInput } from "@/lib/contracts";
-import { runFeynman } from "@/services/learn";
-
-export async function POST(request: Request) {
-  return handle(request, feynmanInput, { limit: 30 }, async (input) => {
-    const user = await getLocalUser();
-    return runFeynman(user, input.date, input.explanation);
+// Feynman grading removed — AI is no longer used.
+// Explanation saving is handled by PATCH /api/learn/concept.
+// This file is kept as a stub so existing client imports don't 404.
+export async function POST() {
+  return new Response(JSON.stringify({ error: "AI grading has been removed. Save your explanation via the concept route." }), {
+    status: 410,
+    headers: { "Content-Type": "application/json" },
   });
 }
