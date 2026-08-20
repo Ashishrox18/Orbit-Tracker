@@ -2,7 +2,7 @@ import { z } from "zod";
 import { getLocalUser } from "@/db";
 import { handle, UserFacingError } from "@/lib/api";
 import { isoDate } from "@/lib/contracts";
-import { addWordManual, todaysWords, deleteWord } from "@/services/learn";
+import { addWordManual, deleteWord } from "@/services/learn";
 
 // POST — add a word manually
 const addInput = z.object({
